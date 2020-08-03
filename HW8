@@ -1,0 +1,260 @@
+ SELECT * FROM invoices 
+ 4   SELECT * FROM vendors 
+ 5   
+ 6   
+ 7
+ 8   
+ 9   SELECT * FROM invoices 
+ 10   where invoicetotal > 200 
+ 11   
+ 12   SELECT * FROM invoices 
+ 13   where invoicetotal >(select avg(invoicetotal) from invoices ) 
+ 14   
+ 15   
+ 16
+ 17  
+ 18   select * from vendors where vendorid in (11,12,13) 
+ 19   
+ 20   select * from vendors where 
+ 21   vendorid in (select distinct vendorid from invoices where invoicenumber like '2%') 
+ 22   
+ 23   
+ 24   /*When you use subquery along with IN operator, 
+ 25   the subquery must return single column of values*/ 
+ 26   
+ 27   select * from vendors where vendorid 
+ 28   in (select distinct vendorid from invoices) 
+ 29   
+ 30   select * from vendors where vendorid 
+ 31   not in (select distinct vendorid from invoices) 
+ 32   
+ 33   
+ 34   /*sub queries in the FROM clause*/ 
+ 35   
+ 36   SELECT VendorID,AverageIT 
+ 37   FROM (SELECT VendorID,Avg(InvoiceTotal) AS AverageIT 
+ 38   FROM Invoices 
+ 39   GROUP BY VendorID) AS Table1 
+ 40   ORDER BY AverageIT 
+ 41   
+ 42   
+ 43   
+ 44   select invoicenumber,invoicedate,invoicetotal,vendorcity 
+ 45   from invoices join (select * from vendors where vendorstate='CA') AS vendor_st ON 
+ 46   invoices.vendorid=vendor_st.vendorid 
+ 47   
+ 48   select invoices.vendorid,invoicenumber,invoicedate,invoicetotal, IT 
+ 49   from invoices join (select top 5 vendorid, avg(invoicetotal) AS IT 
+ 50   from invoices 
+ 51   group by VendorId ) as topvendor 
+ 52   on invoices.vendorid=topvendor.vendorid 
+ 53   
+ 54   
+ 55   /* Coding subquery in the HAVING clause */ 
+ 56   
+ 57   SELECT 
+ 58   vendorid, avg(invoicetotal) 
+ 59   from invoices 
+ 60   group by vendorid 
+ 61   having 
+ 62   vendorid in (SELECT vendorid FROM vendors where vendorstate in ('MA','MI','NV')) 
+ 63   
+ 64   
+ 65   /* Coding subquery in the SELECT clause */ 
+ 66   
+67   Select 
+68   vendors.vendorid, VendorName, 
+69   (select max(InvoiceTotal) FROM Invoices) as avgInv 
+70   from vendors 
+71   
+72   Select 
+73   vendors.vendorid, VendorName, 
+74   (select max(InvoiceTotal) FROM Invoices 
+75   WHERE invoices.vendorid=vendors.vendorid) as MaxInv 
+76   from vendors 
+77   order by MaxInv desc 
+78   
+79   select * from invoices order by vendorid 
+80   
+81   
+82   
+83   
+84   
+85   /*A query that uses a inner join*/ 
+86   select InvoiceNumber, InvoiceDate, InvoiceTotal ,Vendorname,vendorstate 
+87   from invoices join vendors 
+88   on invoices.vendorid=vendors.vendorid WHERE VendorState='CA' 
+89   
+90   
+91   /* A query that uses a subquery*/ 
+92   select InvoiceNumber, InvoiceDate, InvoiceTotal from invoices 
+93   where VendorID in ( select VendorID from vendors where VendorState ='CA') 
+94   
+95   
+96   
+97   
+98   
+99   
+100   /************************** VIEWS **********************************/ 
+101   
+102   select * from vendors 
+103   
+104   /*view with only few columns from a table*/ 
+105   
+106   CREATE VIEW VendorsView1 AS 
+107   SELECT Vendorname, VendorState, VendorPhone from Vendors 
+108   
+109   select * FROM VendorsView1 
+110   
+111   drop view VendorsView1 
+112   
+113   select * from Vendors where VenDorState ='NN' 
+114   
+115   select * FROM VendorsView1 where VenDorState='NN' 
+116   
+117   update VendorsView1 set VenDorState='NN' where VenDorState='NJ' 
+118   
+119   in 
+120   
+121   /*View created from a select query that might be used frequently*/ 
+122   
+123   CREATE VIEW VendorsShortList AS 
+124   SELECT * from vendors 
+125   where VendorID in ( select distinct VendorID from invoices ) 
+126   
+127   select * FROM VendorsShortList 
+128   
+129   /*view that involves a join*/ 
+130   CREATE VIEW VendorsInvoices AS 
+131   SELECT vendorname, invoicenumber,invoicedate,invoicetotal 
+132   from vendors join invoices
+133   on vendors.vendorid=invoices.vendorid 
+134   
+135   select * from VendorsInvoices 
+136   
+137   /*view that involves top and orderby clauses*/ 
+138   CREATE VIEW TopVendors AS 
+139   SELECT top 5 percent vendorid,invoicetotal 
+140   from invoices order by invoicetotal desc 
+141   
+142   SELECT * FROM TopVendors 
+143   
+144   
+145   
+146   /*To delete or modify a view*/ 
+147   DROP VIEW TopVendors 
+148   
+149   CREATE VIEW Vedors_sw AS 
+150   SELECT * FROM vendors where vendorstate in('CA','AZ','NV','NM') 
+151   
+152   ALTER VIEW Vedors_sw AS 
+153   SELECT * FROM vendors where vendorstate in('CA','AZ','NV','NM','UT','CO') 
+154   
+155   
+156   ALTER VIEW Vedors_sw AS 
+157   SELECT top 5 percent vendorid,invoicetotal 
+158   from invoices order by invoicetotal desc 
+159   
+160   SELECT * FROM Vedors_sw 
+161   
+162   
+163   /********************FUNCTIONS**************************/ 
+164   
+165   /* SQL server provides many functions for working with 
+166   string data to do string manipulation.*/ 
+167   
+168   
+169   SELECT VendorName from vendors where vendorid=2 
+170   
+171   /* LEN returns the length of the string*/ 
+172   
+173   SELECT LEN('Kaitlyn') 
+174   
+175   SELECT LEN(VendorName) from vendors where vendorid=2 
+176   
+177   /* LEFT returns the specified number of characters 
+178   from the beginning of the string*/ 
+179   
+180   SELECT LEFT('Kaitlyn',6) 
+181   
+182   SELECT LEFT(VendorName,3) from vendors where vendorid=2 
+183   
+184   /* RIGHT returns the specified number of characters 
+185   from the end of the string*/ 
+186   
+187   SELECT RIGHT('Kaitlyn',2) 
+188   
+189   /* Returns the string after removing the leading spaces*/ 
+190   
+191   SELECT ('     Kaitlyn') 
+192   
+193   SELECT LTRIM(' Kaitlyn') 
+194   
+195   SELECT LTRIM(VendorName) from vendors 
+196   
+197   /* Returns the string after removing the trailing spaces*/ 
+198   
+199   SELECT RTRIM('Kaitlyn ') 
+200   
+201   SELECT LTRIM(RTRIM('  Kaitlyn ')) 
+202   
+203   SELECT LTRIM(RTRIM(VendorName)) from vendors 
+204   /* Returns the string in upper case*/ 
+205   
+206   SELECT UPPER('Kaitlyn') 
+207   
+208   SELECT UPPER(VendorName) from vendors 
+209   
+210   /* Returns the string in  lower case*/ 
+211   
+212   SELECT LOWER('KaitlyN') 
+213   
+214   SELECT LOWER(VendorName) from vendors 
+215   
+216   SELECT REVERSE(VendorName) from vendors 
+217   
+218   SELECT REVERSE('KaitlyN ') 
+219   
+220   SELECT SUBSTRING(VendorName,4,10) from vendors where vendorid=2 
+221   
+222   SELECT VendorName from vendors where vendorid=2 
+223   
+224   SELECT REPLACE(VendorName,'ctr','center') from vendors where vendorid=2 
+225   
+226   SELECT CONCAT(VendorName,'name') from vendors where vendorid=2 
+227   
+228   
+229   
+230   SELECT CHARINDEX('SQL','SQLserver') 
+231   
+232   SELECT CHARINDEX('-','(559) 555-1212') 
+233   
+234   SELECT CHARINDEX('d',Vendorname) from vendors where vendorid=2 
+235   
+236   SELECT VendorName from vendors where vendorid=2 
+237   
+238   SELECT CHARINDEX('a',Vendorname) from vendors where vendorid=2 
+239   
+240   SELECT CHARINDEX('a',Vendorname,17) from vendors where vendorid=2 
+241   
+242   /*PATINDEX returns the position of a pattern in a string*/ 
+243   
+244   SELECT PATINDEX('%s','MSSQLserver') 
+245   
+246   SELECT PATINDEX('Q',' MSSQLserver') 
+247   
+248   SELECT PATINDEX('%a%',Vendorname) from vendors where vendorid=2 
+249   
+250   SELECT VendorName from vendors where vendorid=2 
+251   
+252   
+253   
+254   SELECT Vendorname, 
+255   vendorcontactFname, 
+256   vendorcontactLname, 
+257   Vendorphone, 
+258   CONCAT(vendorcontactlname,', ',LEFT(VendorContactFname,1),'.') as ContactName, 
+259   Right(VendorPhone,8) as phone 
+260   from vendors 
+261   where substring(vendorphone,2,3)=559 
+262   order by vendorname
